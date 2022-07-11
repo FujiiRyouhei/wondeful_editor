@@ -422,3 +422,6 @@ Style/HashTransformKeys:
 # version 1 からは強制 true
 Style/HashTransformValues:
   Enabled: true
+
+Style/Documentation:
+  Enabled: false
