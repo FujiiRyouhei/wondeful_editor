@@ -18,7 +18,7 @@ RSpec.describe User, type: :model do
 
   context "password が指定されていないとき" do
     it "user の作成に失敗する" do
-      user = FactoryBot.build(:user, password:nil)
+      user = FactoryBot.build(:user, password: nil)
       expect(user).to be_invalid
       expect(user.errors.details[:password][0][:error]).to eq :blank
     end

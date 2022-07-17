@@ -5,7 +5,6 @@ RSpec.describe Article, type: :model do
     it "article が作られる" do
       article = FactoryBot.build(:article)
       expect(article).to be_valid
-
     end
   end
 
@@ -24,5 +23,4 @@ RSpec.describe Article, type: :model do
       expect(article.errors.details[:body][0][:error]).to eq :blank
     end
   end
-
 end

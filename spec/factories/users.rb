@@ -3,7 +3,7 @@ FactoryBot.define do
     name { Faker::Name.name }
     # encrypted_password { Faker::Internet.password }
     password { "password" }
-    sequence(:email) { |n| "#{Faker::Internet.email}" }
+    sequence(:email) {|_n| Faker::Internet.email.to_s }
 
     trait :with_article do
       article
