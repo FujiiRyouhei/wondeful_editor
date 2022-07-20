@@ -4,8 +4,6 @@ Rails.application.routes.draw do
   # resources :articles, path: 'api/v1/article'
   # mount_devise_token_auth_for "User", at: "auth"
   # resources :user
-
-
   namespace :api do
     namespace :v1 do
       mount_devise_token_auth_for "User", at: "auth"
