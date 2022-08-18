@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :article do
-    title { "ABC" }
-    body { "ABC" }
+    title { Faker::Lorem.word }
+    body { Faker::Lorem.sentence }
     user
 
     trait :with_comment do
