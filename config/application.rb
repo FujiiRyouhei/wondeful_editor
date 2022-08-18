@@ -48,5 +48,6 @@ module WondefulEditor
     end
 
     config.api_only = true
+    config.autoloader = :classic
   end
 end
