@@ -11,3 +11,6 @@ AllCops:
 
 RSpec/MultipleExpectations:
   Max: 6
+
+RSpec/MultipleMemoizedHelpers:
+  max: 6
