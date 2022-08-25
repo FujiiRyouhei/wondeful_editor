@@ -10,4 +10,7 @@ AllCops:
   TargetRubyVersion: 2.7
 
 RSpec/MultipleExpectations:
-  Max: 2
+  Max: 6
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 6
