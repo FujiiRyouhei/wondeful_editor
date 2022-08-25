@@ -33,8 +33,7 @@ gem "bootsnap", ">= 1.4.2", require: false
 gem "devise"
 gem "devise_token_auth"
 # gem "omniauth", ">= 1.0.0"
-gem "active_model_serializers", "~> 0.10.0"
-# gem "rack-cors"
+gem "rack-cors"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
