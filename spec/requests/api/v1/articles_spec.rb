@@ -32,7 +32,7 @@ RSpec.describe "/articles", type: :request do
     {}
   }
 
-  describe "GET /api_v1_articles" do
+  describe "GET /api/v1/articles" do
     subject { get(api_v1_articles_path) }
     # before { create_list(:article, 3)}
 
@@ -54,13 +54,42 @@ RSpec.describe "/articles", type: :request do
     end
   end
 
-  # describe "GET /show" do
-  #   it "renders a successful response" do
-  #     article = Article.create! valid_attributes
-  #     get article_url(article), as: :json
-  #     expect(response).to be_successful
-  #   end
-  # end
+  describe "GET /api/v1/articles/:id" do
+    subject { get(api_v1_article_path(article_id)) }
+
+    context "指定した id の article が存在するとき" do
+      let(:article_id) { article.id }
+      let(:article) { create(:article) }
+
+      fit "article の詳細が取得できる" do
+        subject
+        res = JSON.parse(response.body)
+        expect(res["id"]).to eq article.id
+        expect(res["title"]).to eq article.title
+        expect(res["body"]).to eq article.body
+        expect(res["updated_at"]).to be_present
+        expect(res["user"]["id"]).to eq article.user.id
+        expect(res["user"]["name"]).to eq article.user.name
+        expect(res["user"]["email"]).to eq article.user.email
+        expect(res["user"].keys).to eq ["id", "name", "email"]
+
+        expect(response).to have_http_status(200)
+        # binding.pry
+        # article = Article.create! valid_attributes
+        # get article_url(article), as: :json
+        # expect(response).to be_successful
+      end
+    end
+
+    context "指定した id の article が存在しない時" do
+      let(:article_id) { 100000000000000000 }
+
+      it "article が見つからない" do
+        expect { subject }.to raise_error (ActiveRecord::RecordNotFound)
+      end
+    end
+
+  end
 
   # describe "POST /create" do
   #   context "with valid parameters" do

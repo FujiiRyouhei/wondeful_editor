@@ -13,7 +13,7 @@ module Api
       # GET /articles/1
       # GET /articles/1.json
       def show
-        render json: @article
+        render json: @article, serializer: Api::V1::ArticleSerializer
       end
 
       # POST /articles
