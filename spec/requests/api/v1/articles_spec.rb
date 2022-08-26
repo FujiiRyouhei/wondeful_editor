@@ -61,7 +61,7 @@ RSpec.describe "/articles", type: :request do
       let(:article_id) { article.id }
       let(:article) { create(:article) }
 
-      fit "article の詳細が取得できる" do
+      it "article の詳細が取得できる" do
         subject
         res = JSON.parse(response.body)
         expect(res["id"]).to eq article.id
@@ -73,7 +73,7 @@ RSpec.describe "/articles", type: :request do
         expect(res["user"]["email"]).to eq article.user.email
         expect(res["user"].keys).to eq ["id", "name", "email"]
 
-        expect(response).to have_http_status(200)
+        expect(response).to have_http_status(:ok)
         # binding.pry
         # article = Article.create! valid_attributes
         # get article_url(article), as: :json
@@ -82,13 +82,12 @@ RSpec.describe "/articles", type: :request do
     end
 
     context "指定した id の article が存在しない時" do
-      let(:article_id) { 100000000000000000 }
+      let(:article_id) { 100_000_000_000_000_000 }
 
       it "article が見つからない" do
-        expect { subject }.to raise_error (ActiveRecord::RecordNotFound)
+        expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
-
   end
 
   # describe "POST /create" do

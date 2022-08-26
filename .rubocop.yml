@@ -10,10 +10,13 @@ AllCops:
   TargetRubyVersion: 2.7
 
 RSpec/MultipleExpectations:
-  Max: 5
+  Max: 100
 
 RSpec/MultipleMemoizedHelpers:
-  Max: 6
+  Max: 100
 
 RSpec/EmptyExampleGroup:
   Enabled: false
+
+RSpec/ExampleLength:
+  Max: 100
