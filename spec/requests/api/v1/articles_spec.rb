@@ -74,10 +74,6 @@ RSpec.describe "/articles", type: :request do
         expect(res["user"].keys).to eq ["id", "name", "email"]
 
         expect(response).to have_http_status(:ok)
-        # binding.pry
-        # article = Article.create! valid_attributes
-        # get article_url(article), as: :json
-        # expect(response).to be_successful
       end
     end
 
@@ -90,39 +86,38 @@ RSpec.describe "/articles", type: :request do
     end
   end
 
-  # describe "POST /create" do
-  #   context "with valid parameters" do
-  #     it "creates a new Article" do
-  #       expect {
-  #         post articles_url,
-  #              params: { article: valid_attributes }, headers: valid_headers, as: :json
-  #       }.to change { Article.count }.by(1)
-  #     end
+  describe "POST /api/v1/articles" do
+    subject { post(api_v1_articles_path, params: params) }
 
-  #     it "renders a JSON response with the new article" do
-  #       post articles_url,
-  #            params: { article: valid_attributes }, headers: valid_headers, as: :json
-  #       expect(response).to have_http_status(:created)
-  #       expect(response.content_type).to match(a_string_including("application/json"))
-  #     end
-  #   end
+    before do
+      allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user)
+    end
 
-  #   context "with invalid parameters" do
-  #     it "does not create a new Article" do
-  #       expect {
-  #         post articles_url,
-  #              params: { article: invalid_attributes }, as: :json
-  #       }.to change { Article.count }.by(0)
-  #     end
+    context "適切なパラメーターを送信したとき" do
+      let(:params) { { article: attributes_for(:article) } }
+      let(:current_user) { create(:user) }
 
-  #     it "renders a JSON response with errors for the new article" do
-  #       post articles_url,
-  #            params: { article: invalid_attributes }, headers: valid_headers, as: :json
-  #       expect(response).to have_http_status(:unprocessable_entity)
-  #       expect(response.content_type).to match(a_string_including("application/json"))
-  #     end
-  #   end
-  # end
+      it "article のレコードを作成できる" do
+        expect { subject }.to change { Article.where(user_id: current_user.id).count }.by(1)
+        res = JSON.parse(response.body)
+        expect(res["user"]["id"]).to eq current_user.id
+        expect(res["user"]["name"]).to eq current_user.name
+        expect(res["user"]["email"]).to eq current_user.email
+        expect(res["title"]).to eq params[:article][:title]
+        expect(res["body"]).to eq params[:article][:body]
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "不適切なパラメーターを送信した時" do
+      let(:params) { attributes_for(:article) }
+      let(:current_user) { create(:user) }
+
+      it "エラーする" do
+        expect { subject }.to raise_error(ActionController::ParameterMissing)
+      end
+    end
+  end
 
   # describe "PATCH /update" do
   #   context "with valid parameters" do
