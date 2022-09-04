@@ -1,6 +1,8 @@
 module Api
   module V1
-    class ArticlesController < ApplicationController
+    class ArticlesController < BaseApiController
+      protect_from_forgery
+      skip_before_action :verify_authenticity_token
       before_action :set_article, only: %i[show update destroy]
 
       # GET /articles
@@ -19,13 +21,8 @@ module Api
       # POST /articles
       # POST /articles.json
       def create
-        @article = Article.new(article_params)
-
-        if @article.save
-          render :show, status: :created, location: @article
-        else
-          render json: @article.errors, status: :unprocessable_entity
-        end
+        @article = current_user.articles.create!(article_params)
+        render json: @article, serializer: Api::V1::ArticleSerializer
       end
 
       # PATCH/PUT /articles/1
@@ -53,7 +50,7 @@ module Api
 
         # Only allow a list of trusted parameters through.
         def article_params
-          params.fetch(:article, {})
+          params.require(:article).permit(:title, :body)
         end
     end
   end
