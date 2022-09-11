@@ -146,12 +146,31 @@ RSpec.describe "/articles", type: :request do
     end
   end
 
-  # describe "DELETE /destroy" do
-  #   it "destroys the requested article" do
-  #     article = Article.create! valid_attributes
-  #     expect {
-  #       delete article_url(article), headers: valid_headers, as: :json
-  #     }.to change { Article.count }.by(-1)
-  #   end
-  # end
+  describe "DELETE /api/v1/articles/:id" do
+    subject { delete(api_v1_article_path(article.id)) }
+
+    before { allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user) }
+
+    let(:current_user) { create(:user) }
+
+    context "指定した id の記事が存在するとき" do
+      let!(:article) { create(:article, user: current_user) }
+
+      it "記事が削除される" do
+        expect { subject }.to change { Article.where(user_id: current_user.id).count }.by(-1)
+        expect(response.body).to eq ""
+        expect(response).to have_http_status(:no_content)
+      end
+    end
+
+    context "指定した id の記事が存在しない時" do
+      let!(:article) { create(:article, user: other_user) }
+      let(:other_user) { create(:user) }
+
+      it "記事の削除に失敗する" do
+        expect { subject }.to raise_error(ActiveRecord::RecordNotFound) &
+                              change { Article.where(user_id: current_user.id).count }.by(0)
+      end
+    end
+  end
 end
