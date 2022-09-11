@@ -89,9 +89,7 @@ RSpec.describe "/articles", type: :request do
   describe "POST /api/v1/articles" do
     subject { post(api_v1_articles_path, params: params) }
 
-    before do
-      allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user)
-    end
+    before { allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user) }
 
     context "適切なパラメーターを送信したとき" do
       let(:params) { { article: attributes_for(:article) } }
@@ -119,39 +117,34 @@ RSpec.describe "/articles", type: :request do
     end
   end
 
-  # describe "PATCH /update" do
-  #   context "with valid parameters" do
-  #     let(:new_attributes) {
-  #       skip("Add a hash of attributes valid for your model")
-  #     }
+  describe "PATCH /api/v1/articles/:id" do
+    subject { patch(api_v1_article_path(article.id), params: params) }
 
-  #     it "updates the requested article" do
-  #       article = Article.create! valid_attributes
-  #       patch article_url(article),
-  #             params: { article: new_attributes }, headers: valid_headers, as: :json
-  #       article.reload
-  #       skip("Add assertions for updated state")
-  #     end
+    before { allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user) }
 
-  #     it "renders a JSON response with the article" do
-  #       article = Article.create! valid_attributes
-  #       patch article_url(article),
-  #             params: { article: new_attributes }, headers: valid_headers, as: :json
-  #       expect(response).to have_http_status(:ok)
-  #       expect(response.content_type).to match(a_string_including("application/json"))
-  #     end
-  #   end
+    let(:current_user) { create(:user) }
+    let(:params) { { article: { title: Faker::Lorem.word, created_at: 1.day.ago } } }
 
-  #   context "with invalid parameters" do
-  #     it "renders a JSON response with errors for the article" do
-  #       article = Article.create! valid_attributes
-  #       patch article_url(article),
-  #             params: { article: invalid_attributes }, headers: valid_headers, as: :json
-  #       expect(response).to have_http_status(:unprocessable_entity)
-  #       expect(response.content_type).to match(a_string_including("application/json"))
-  #     end
-  #   end
-  # end
+    context "自分が所持している記事のレコードを更新しようとした時" do
+      let(:article) { create(:article, user: current_user) }
+
+      it "任意のユーザーの記事が更新される" do
+        expect { subject }.to change { article.reload.title }.from(article.title).to(params[:article][:title]) &
+                              not_change { article.body } &
+                              not_change { article.created_at }
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "自分が所持していないレコードを更新しようとした時" do
+      let!(:article) { create(:article, user: other_user) }
+      let(:other_user) { create(:user) }
+
+      it "記事の更新に失敗する" do
+        expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
 
   # describe "DELETE /destroy" do
   #   it "destroys the requested article" do
