@@ -37,7 +37,8 @@ module Api
       # DELETE /articles/1
       # DELETE /articles/1.json
       def destroy
-        @article.destroy
+        @article = current_user.articles.find(params[:id])
+        @article.destroy!
       end
 
       private
