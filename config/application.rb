@@ -51,5 +51,6 @@ module WondefulEditor
 
     config.api_only = true
     config.autoloader = :classic
+    config.middleware.use ActionDispatch::Flash
   end
 end
