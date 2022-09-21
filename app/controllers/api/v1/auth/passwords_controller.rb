@@ -1,5 +1,4 @@
 class DeviseTokenAuth::PasswordsController < ApplicationController
-
   def new
   end
 
@@ -8,5 +7,4 @@ class DeviseTokenAuth::PasswordsController < ApplicationController
 
   def update
   end
-
 end

@@ -1,5 +1,4 @@
 class DeviseTokenAuth::SessionsController < ApplicationController
-
   def new
   end
 
@@ -11,5 +10,4 @@ class DeviseTokenAuth::SessionsController < ApplicationController
 
   def cancel
   end
-
 end
