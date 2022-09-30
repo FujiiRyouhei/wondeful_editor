@@ -1,14 +1,13 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "Api/V1::Auth::Registrations", type: :request do
-
   describe "POST /api/v1/auth/registrations" do
     subject { post(api_v1_user_registration_path, params: params) }
 
     context "正しいパラメーターを送信したとき" do
       let(:params) { attributes_for(:user) }
 
-      fit "新規ユーザーが登録される" do
+      it "新規ユーザーが登録される" do
         expect { subject }.to change { User.count }.by(1)
         expect(response).to have_http_status(:ok)
         res = JSON.parse(response.body)
@@ -41,7 +40,7 @@ RSpec.describe "Api/V1::Auth::Registrations", type: :request do
       end
 
       context "password がなかった時" do
-        let(:params) {attributes_for(:user, password: nil)}
+        let(:params) { attributes_for(:user, password: nil) }
 
         it "エラーが生じる" do
           subject
@@ -49,7 +48,6 @@ RSpec.describe "Api/V1::Auth::Registrations", type: :request do
           expect { subject }.to change { User.count }.by(0)
           expect(response).to have_http_status(:unprocessable_entity)
           expect(res["errors"]["password"]).to include "can't be blank"
-
         end
       end
     end
