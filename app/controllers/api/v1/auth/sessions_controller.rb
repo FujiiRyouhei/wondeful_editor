@@ -1,4 +1,5 @@
-class DeviseTokenAuth::SessionsController < ApplicationController
+class Api::V1::Auth::SessionsController < DeviseTokenAuth::SessionsController
+
   def new
   end
 
