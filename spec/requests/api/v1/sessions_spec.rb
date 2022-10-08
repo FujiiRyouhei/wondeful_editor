@@ -6,7 +6,7 @@ RSpec.describe "Api/V1::Auth::Sessions", type: :request do
 
     context "email と password が一致した時" do
       let(:user) { create(:user) }
-      let(:params) { attributes_for(:user, email:user.email, password:user.password) }
+      let(:params) { attributes_for(:user, email: user.email, password: user.password) }
 
       it "ログインできる" do
         subject
@@ -15,13 +15,12 @@ RSpec.describe "Api/V1::Auth::Sessions", type: :request do
         expect(header["client"]).to be_present
         expect(header["access-token"]).to be_present
         expect(response).to have_http_status(:ok)
-
       end
     end
 
     context "emailが一致しない時" do
       let(:user) { create(:user) }
-      let(:params) { attributes_for(:user, email:"hoge", password:user.password) }
+      let(:params) { attributes_for(:user, email: "hoge", password: user.password) }
 
       it "ログインに失敗する" do
         subject
@@ -31,14 +30,13 @@ RSpec.describe "Api/V1::Auth::Sessions", type: :request do
         expect(header["uid"]).to be_blank
         expect(header["client"]).to be_blank
         expect(header["access-token"]).to be_blank
-        expect(response).to have_http_status(401)
-
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 
     context "passwordが一致しない時" do
       let(:user) { create(:user) }
-      let(:params) {attributes_for(:user, email:user.email, password:"hoge")}
+      let(:params) { attributes_for(:user, email: user.email, password: "hoge") }
 
       it "ログインに失敗する" do
         subject
@@ -48,10 +46,8 @@ RSpec.describe "Api/V1::Auth::Sessions", type: :request do
         expect(header["uid"]).to be_blank
         expect(header["client"]).to be_blank
         expect(header["access-token"]).to be_blank
-        expect(response).to have_http_status(401)
+        expect(response).to have_http_status(:unauthorized)
       end
-
     end
-
   end
 end
