@@ -72,13 +72,13 @@ RSpec.describe "Api/V1::Auth::Sessions", type: :request do
 
     context "入力内容に誤りがある時" do
       let(:user) { create(:user) }
-      let(:params) { {"uid": "", "access-token": "", "client": "", "token-type": "", "expity": ""} }
+      let(:params) { { "uid": "", "access-token": "", "client": "", "token-type": "", "expity": "" } }
 
       it "ログアウトに失敗する" do
         subject
         res = JSON.parse(response.body)
         expect(res["errors"]).to include "User was not found or was not logged in."
-        expect(response).to have_http_status(404)
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
