@@ -1,6 +1,7 @@
 module Api
   module V1
     class ArticlesController < BaseApiController
+      before_action :authenticate_user!, only: [:create, :update, :destroy]
       protect_from_forgery
       skip_before_action :verify_authenticity_token
       # before_action :set_article, only: %i[show update destroy]
