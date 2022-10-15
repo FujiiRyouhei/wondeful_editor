@@ -87,13 +87,12 @@ RSpec.describe "/articles", type: :request do
   end
 
   describe "POST /api/v1/articles" do
-    subject { post(api_v1_articles_path, params: params) }
-
-    before { allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user) }
+    subject { post(api_v1_articles_path, params: params, headers: headers) }
 
     context "適切なパラメーターを送信したとき" do
       let(:params) { { article: attributes_for(:article) } }
       let(:current_user) { create(:user) }
+      let(:headers) { current_user.create_new_auth_token }
 
       it "article のレコードを作成できる" do
         expect { subject }.to change { Article.where(user_id: current_user.id).count }.by(1)
@@ -110,6 +109,7 @@ RSpec.describe "/articles", type: :request do
     context "不適切なパラメーターを送信した時" do
       let(:params) { attributes_for(:article) }
       let(:current_user) { create(:user) }
+      let(:headers) { current_user.create_new_auth_token }
 
       it "エラーする" do
         expect { subject }.to raise_error(ActionController::ParameterMissing)
@@ -118,12 +118,11 @@ RSpec.describe "/articles", type: :request do
   end
 
   describe "PATCH /api/v1/articles/:id" do
-    subject { patch(api_v1_article_path(article.id), params: params) }
-
-    before { allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user) }
+    subject { patch(api_v1_article_path(article.id), params: params, headers: headers) }
 
     let(:current_user) { create(:user) }
     let(:params) { { article: { title: Faker::Lorem.word, created_at: 1.day.ago } } }
+    let(:headers) { current_user.create_new_auth_token }
 
     context "自分が所持している記事のレコードを更新しようとした時" do
       let(:article) { create(:article, user: current_user) }
@@ -147,11 +146,10 @@ RSpec.describe "/articles", type: :request do
   end
 
   describe "DELETE /api/v1/articles/:id" do
-    subject { delete(api_v1_article_path(article.id)) }
-
-    before { allow_any_instance_of(Api::V1::BaseApiController).to receive(:current_user).and_return(current_user) }
+    subject { delete(api_v1_article_path(article.id), headers: headers) }
 
     let(:current_user) { create(:user) }
+    let(:headers) { current_user.create_new_auth_token }
 
     context "指定した id の記事が存在するとき" do
       let!(:article) { create(:article, user: current_user) }
