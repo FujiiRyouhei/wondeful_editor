@@ -9,14 +9,14 @@ module Api
       # GET /articles
       # GET /articles.json
       def index
-        @articles = Article.all.order(updated_at: :desc)
+        @articles = Article.where(status: 1).order(updated_at: :desc)
         render json: @articles, each_serializer: Api::V1::ArticlePreviewSerializer
       end
 
       # GET /articles/1
       # GET /articles/1.json
       def show
-        @article = Article.find(params[:id])
+        @article = Article.where(status: 1).find(params[:id])
         render json: @article, serializer: Api::V1::ArticleSerializer
       end
 
@@ -52,7 +52,7 @@ module Api
 
         # Only allow a list of trusted parameters through.
         def article_params
-          params.require(:article).permit(:title, :body)
+          params.require(:article).permit(:title, :body, :status)
         end
     end
   end

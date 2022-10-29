@@ -36,30 +36,30 @@ RSpec.describe "/articles", type: :request do
     subject { get(api_v1_articles_path) }
     # before { create_list(:article, 3)}
 
-    let!(:article1) { create(:article, updated_at: 1.days.ago) }
-    let!(:article2) { create(:article, updated_at: 2.days.ago) }
-    let!(:article3) { create(:article) }
+    let!(:article1) { create(:article, updated_at: 1.days.ago, status: 0) }
+    let!(:article2) { create(:article, updated_at: 1.days.ago, status: 1) }
+    let!(:article3) { create(:article, updated_at: 2.days.ago, status: 0) }
+    let!(:article4) { create(:article, updated_at: 2.days.ago, status: 1) }
+    let!(:article5) { create(:article, status: 0) }
+    let!(:article6) { create(:article, status: 1) }
 
-    it "article の一覧が取得できる" do
+    it "公開されている article の一覧が作成順に取得できる" do
       subject
       res = JSON.parse(response.body)
-
       expect(res.length).to eq 3
       expect(res[0].keys).to eq ["id", "title", "updated_at", "user"]
       expect(response).to have_http_status(:ok)
-      expect(res.map {|d| d["id"] }).to eq [article3.id, article1.id, article2.id]
+      expect(res.map {|d| d["id"] }).to eq [article6.id, article2.id, article4.id]
       expect(res[0]["user"].keys).to eq ["id", "name", "email"]
-      # Article.create! valid_attributes
-      # expect(response).to be_successful
     end
   end
 
   describe "GET /api/v1/articles/:id" do
     subject { get(api_v1_article_path(article_id)) }
 
-    context "指定した id の article が存在するとき" do
+    context "対象の記事が公開中の時" do
       let(:article_id) { article.id }
-      let(:article) { create(:article) }
+      let(:article) { create(:article, :published) }
 
       it "article の詳細が取得できる" do
         subject
@@ -72,8 +72,16 @@ RSpec.describe "/articles", type: :request do
         expect(res["user"]["name"]).to eq article.user.name
         expect(res["user"]["email"]).to eq article.user.email
         expect(res["user"].keys).to eq ["id", "name", "email"]
-
         expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "対象の記事が下書きの時" do
+      let(:article_id) { article.id }
+      let(:article) { create(:article, status: 0) }
+
+      it "表示されない" do
+        expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 
@@ -89,12 +97,13 @@ RSpec.describe "/articles", type: :request do
   describe "POST /api/v1/articles" do
     subject { post(api_v1_articles_path, params: params, headers: headers) }
 
-    context "適切なパラメーターを送信したとき" do
-      let(:params) { { article: attributes_for(:article) } }
-      let(:current_user) { create(:user) }
-      let(:headers) { current_user.create_new_auth_token }
+    let(:current_user) { create(:user) }
+    let(:headers) { current_user.create_new_auth_token }
 
-      it "article のレコードを作成できる" do
+    context "公開状態で記事を作成した時" do
+      let(:params) { { article: attributes_for(:article, status: "published") } }
+
+      it "記事が作成できる" do
         expect { subject }.to change { Article.where(user_id: current_user.id).count }.by(1)
         res = JSON.parse(response.body)
         expect(res["user"]["id"]).to eq current_user.id
@@ -102,6 +111,23 @@ RSpec.describe "/articles", type: :request do
         expect(res["user"]["email"]).to eq current_user.email
         expect(res["title"]).to eq params[:article][:title]
         expect(res["body"]).to eq params[:article][:body]
+        expect(res["status"]).to eq params[:article][:status]
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "記事を下書き状態で作成した時" do
+      let(:params) { { article: attributes_for(:article, status: "draft") } }
+
+      it "下書き記事が作成できる" do
+        expect { subject }.to change { Article.where(user_id: current_user.id).count }.by(1)
+        res = JSON.parse(response.body)
+        expect(res["user"]["id"]).to eq current_user.id
+        expect(res["user"]["name"]).to eq current_user.name
+        expect(res["user"]["email"]).to eq current_user.email
+        expect(res["title"]).to eq params[:article][:title]
+        expect(res["body"]).to eq params[:article][:body]
+        expect(res["status"]).to eq params[:article][:status]
         expect(response).to have_http_status(:ok)
       end
     end
@@ -121,14 +147,15 @@ RSpec.describe "/articles", type: :request do
     subject { patch(api_v1_article_path(article.id), params: params, headers: headers) }
 
     let(:current_user) { create(:user) }
-    let(:params) { { article: { title: Faker::Lorem.word, created_at: 1.day.ago } } }
+    let(:params) { { article: { title: Faker::Lorem.word, status: "published", created_at: 1.day.ago } } }
     let(:headers) { current_user.create_new_auth_token }
 
     context "自分が所持している記事のレコードを更新しようとした時" do
-      let(:article) { create(:article, user: current_user) }
+      let!(:article) { create(:article, status: "draft", user: current_user) }
 
       it "任意のユーザーの記事が更新される" do
         expect { subject }.to change { article.reload.title }.from(article.title).to(params[:article][:title]) &
+                              change { article.reload.status }.from(article.status).to(params[:article][:status]) &
                               not_change { article.body } &
                               not_change { article.created_at }
         expect(response).to have_http_status(:ok)
